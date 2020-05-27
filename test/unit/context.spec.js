@@ -7,7 +7,6 @@ const { protectReject } = require("./utils");
 const lolex = require("@sinonjs/fake-timers");
 
 describe("Test Context", () => {
-
 	it("test with empty opts", () => {
 		let broker = new ServiceBroker({ nodeID: "server-123", logger: false });
 
@@ -27,7 +26,7 @@ describe("Test Context", () => {
 
 		expect(ctx.options).toEqual({
 			timeout: null,
-			retries: null
+			retries: null,
 		});
 
 		expect(ctx.parentID).toBeNull();
@@ -51,7 +50,6 @@ describe("Test Context", () => {
 	});
 
 	it("test with constructor params", () => {
-
 		let broker = new ServiceBroker({ nodeID: "server-123", logger: false });
 		let ctx = new Context(broker);
 
@@ -65,16 +63,15 @@ describe("Test Context", () => {
 });
 
 describe("Test Context.create", () => {
-
 	let broker = new ServiceBroker({ nodeID: "node-1", logger: false });
 	let endpoint = {
 		action: {
 			name: "posts.find",
 			service: {
-				name: "posts"
-			}
+				name: "posts",
+			},
 		},
-		id: "server-123"
+		id: "server-123",
 	};
 
 	it("test without opts", () => {
@@ -121,24 +118,24 @@ describe("Test Context.create", () => {
 			fallbackResponse: "Hello",
 			meta: {
 				user: "John",
-				c: 200
+				c: 200,
 			},
 			parentCtx: {
 				id: 100,
 				level: 5,
 				meta: {
 					token: "123456",
-					c: 100
+					c: 100,
 				},
 				requestID: "1234567890abcdef",
 				tracing: true,
 				action: {
-					name: "posts.list"
+					name: "posts.list",
 				},
 				service: {
-					fullName: "posts"
-				}
-			}
+					fullName: "posts",
+				},
+			},
 		};
 
 		let ctx = Context.create(broker, endpoint, params, opts);
@@ -159,7 +156,7 @@ describe("Test Context.create", () => {
 		expect(ctx.meta).toEqual({
 			token: "123456",
 			user: "John",
-			c: 200
+			c: 200,
 		});
 
 		expect(ctx.options).toEqual(opts);
@@ -181,10 +178,10 @@ describe("Test Context.create", () => {
 			event: {
 				name: "user.created",
 				service: {
-					name: "posts"
-				}
+					name: "posts",
+				},
 			},
-			id: "server-123"
+			id: "server-123",
 		};
 
 		const params = { a: 5 };
@@ -194,25 +191,25 @@ describe("Test Context.create", () => {
 			fallbackResponse: "Hello",
 			meta: {
 				user: "John",
-				c: 200
+				c: 200,
 			},
 			parentCtx: {
 				id: 100,
 				level: 5,
 				meta: {
 					token: "123456",
-					c: 100
+					c: 100,
 				},
 				requestID: "1234567890abcdef",
 				tracing: true,
 				service: {
-					fullName: "posts"
+					fullName: "posts",
 				},
 				span: {
-					id: 300
-				}
+					id: 300,
+				},
 			},
-			caller: "api"
+			caller: "api",
 		};
 
 		let ctx = Context.create(broker, endpoint, params, opts);
@@ -233,7 +230,7 @@ describe("Test Context.create", () => {
 		expect(ctx.meta).toEqual({
 			token: "123456",
 			user: "John",
-			c: 200
+			c: 200,
 		});
 
 		expect(ctx.options).toEqual(opts);
@@ -257,8 +254,9 @@ describe("Test Context.create", () => {
 			parentSpan: {
 				id: 111,
 				traceID: 222,
-				sampled: true
-			}
+				sampled: true,
+			},
+			needAck: true,
 		};
 
 		let ctx = Context.create(broker, endpoint, params, opts);
@@ -276,7 +274,7 @@ describe("Test Context.create", () => {
 		expect(ctx.tracing).toBe(true);
 		expect(ctx.level).toBe(1);
 
-		expect(ctx.needAck).toBeNull();
+		expect(ctx.needAck).toEqual(true);
 		expect(ctx.ackID).toBeNull();
 
 		expect(ctx.requestID).toBe(222);
@@ -290,41 +288,45 @@ describe("Test copy", () => {
 		action: {
 			name: "posts.find",
 			service: {
-				name: "posts"
-			}
+				name: "posts",
+			},
 		},
-		id: "server-123"
+		id: "server-123",
 	};
 
-	const baseCtx = Context.create(broker, endpoint, { a: 5 }, {
-		timeout: 2500,
-		retries: 3,
-		fallbackResponse: "Hello",
-		meta: {
-			user: "John",
-			c: 200
-		},
-		locals: {
-			entity: "entity"
-		},
-		parentCtx: {
-			id: 100,
-			level: 5,
+	const baseCtx = Context.create(
+		broker,
+		endpoint,
+		{ a: 5 },
+		{
+			timeout: 2500,
+			retries: 3,
+			fallbackResponse: "Hello",
 			meta: {
-				token: "123456",
-				c: 100
+				user: "John",
+				c: 200,
 			},
-			requestID: "1234567890abcdef",
-			tracing: true,
-			event: {
-				name: "post.created"
-			}
+			locals: {
+				entity: "entity",
+			},
+			parentCtx: {
+				id: 100,
+				level: 5,
+				meta: {
+					token: "123456",
+					c: 100,
+				},
+				requestID: "1234567890abcdef",
+				tracing: true,
+				event: {
+					name: "post.created",
+				},
+			},
 		}
-	});
+	);
 	baseCtx.id = "123456";
 
 	it("should copy all properties without endpoint", () => {
-
 		const ctx = baseCtx.copy();
 
 		expect(ctx.id).not.toBe(baseCtx.id);
@@ -357,19 +359,17 @@ describe("Test copy", () => {
 		expect(ctx.requestID).toBe(baseCtx.requestID);
 
 		expect(ctx.cachedResult).toBe(false);
-
 	});
 
 	it("should copy all properties with new endpoint", () => {
-
 		const newEndpoint = {
 			event: {
 				name: "post.created",
 				service: {
-					name: "posts"
-				}
+					name: "posts",
+				},
 			},
-			id: "server-333"
+			id: "server-333",
 		};
 
 		baseCtx.eventName = "post.created";
@@ -407,11 +407,8 @@ describe("Test copy", () => {
 		expect(ctx.requestID).toBe(baseCtx.requestID);
 
 		expect(ctx.cachedResult).toBe(false);
-
 	});
-
 });
-
 
 describe("Test setEndpoint", () => {
 	let broker = new ServiceBroker({ nodeID: "node-1", logger: false });
@@ -421,10 +418,10 @@ describe("Test setEndpoint", () => {
 			action: {
 				name: "posts.find",
 				service: {
-					name: "posts"
-				}
+					name: "posts",
+				},
 			},
-			id: "server-123"
+			id: "server-123",
 		};
 
 		let ctx = new Context(broker);
@@ -448,10 +445,10 @@ describe("Test setEndpoint", () => {
 			event: {
 				name: "user.created",
 				service: {
-					name: "posts"
-				}
+					name: "posts",
+				},
 			},
-			id: "server-123"
+			id: "server-123",
 		};
 
 		let ctx = new Context(broker);
@@ -469,12 +466,10 @@ describe("Test setEndpoint", () => {
 		expect(ctx.action).toBeNull();
 		expect(ctx.nodeID).toBe("server-123");
 	});
-
 });
 
 describe("Test setParams", () => {
 	it("should override the params", () => {
-
 		let params1 = { a: 1 };
 		let params2 = { b: 5 };
 
@@ -488,16 +483,15 @@ describe("Test setParams", () => {
 	});
 
 	it("should clone the params", () => {
-
 		let params1 = {
-			a: 1
+			a: 1,
 		};
 
 		let ctx = new Context();
 		ctx.params1 = params1;
 
 		let params2 = {
-			b: 5
+			b: 5,
 		};
 
 		ctx.setParams(params2, true);
@@ -506,13 +500,12 @@ describe("Test setParams", () => {
 	});
 });
 
-
 describe("Test call method", () => {
 	let broker = new ServiceBroker({ logger: false, maxCallLevel: 5 });
 	broker.call = jest.fn(() => broker.Promise.resolve());
 
 	let clock;
-	beforeAll(()=> clock = lolex.install());
+	beforeAll(() => (clock = lolex.install()));
 	afterAll(() => clock.uninstall());
 
 	it("should call broker.call method with itself", () => {
@@ -522,7 +515,9 @@ describe("Test call method", () => {
 		ctx.call("posts.find", p);
 
 		expect(broker.call).toHaveBeenCalledTimes(1);
-		expect(broker.call).toHaveBeenCalledWith("posts.find", p, { parentCtx: ctx });
+		expect(broker.call).toHaveBeenCalledWith("posts.find", p, {
+			parentCtx: ctx,
+		});
 	});
 
 	it("should call broker.call method with options", () => {
@@ -536,7 +531,10 @@ describe("Test call method", () => {
 		ctx.call("posts.find", p, opts);
 
 		expect(broker.call).toHaveBeenCalledTimes(1);
-		expect(broker.call).toHaveBeenCalledWith("posts.find", p, { parentCtx: ctx, timeout: 2500 });
+		expect(broker.call).toHaveBeenCalledWith("posts.find", p, {
+			parentCtx: ctx,
+			timeout: 2500,
+		});
 		expect(broker.call.mock.calls[0][2]).not.toBe(opts);
 		expect(opts.parentCtx).toBeUndefined();
 	});
@@ -563,11 +561,14 @@ describe("Test call method", () => {
 		ctx.startHrTime = process.hrtime();
 		ctx.options.timeout = 200;
 		clock.tick(300);
-		return ctx.call("posts.find", {}).then(protectReject).catch(err => {
-			expect(broker.call).toHaveBeenCalledTimes(0);
-			expect(err).toBeInstanceOf(RequestSkippedError);
-			expect(err.data.action).toBe("posts.find");
-		});
+		return ctx
+			.call("posts.find", {})
+			.then(protectReject)
+			.catch((err) => {
+				expect(broker.call).toHaveBeenCalledTimes(0);
+				expect(err).toBeInstanceOf(RequestSkippedError);
+				expect(err.data.action).toBe("posts.find");
+			});
 	});
 
 	it("should throw Error if reached the 'maxCallLevel'", () => {
@@ -575,12 +576,15 @@ describe("Test call method", () => {
 
 		let ctx = new Context(broker);
 		ctx.level = 5;
-		return ctx.call("posts.find", {}).then(protectReject).catch(err => {
-			expect(broker.call).toHaveBeenCalledTimes(0);
-			expect(err).toBeInstanceOf(MaxCallLevelError);
-			expect(err.code).toBe(500);
-			expect(err.data).toEqual({ nodeID: broker.nodeID, level: 5 });
-		});
+		return ctx
+			.call("posts.find", {})
+			.then(protectReject)
+			.catch((err) => {
+				expect(broker.call).toHaveBeenCalledTimes(0);
+				expect(err).toBeInstanceOf(MaxCallLevelError);
+				expect(err.code).toBe(500);
+				expect(err.data).toEqual({ nodeID: broker.nodeID, level: 5 });
+			});
 	});
 });
 
@@ -588,13 +592,14 @@ describe("Test call with meta merge", () => {
 	let broker = new ServiceBroker({ logger: false, maxCallLevel: 5 });
 	let err = new Error("Subcall error");
 
-	broker.call = jest.fn()
+	broker.call = jest
+		.fn()
 		.mockImplementationOnce(() => {
 			const p = broker.Promise.resolve();
 			p.ctx = {
 				meta: {
-					b: 5
-				}
+					b: 5,
+				},
 			};
 			return p;
 		})
@@ -602,8 +607,8 @@ describe("Test call with meta merge", () => {
 			const p = broker.Promise.reject(err);
 			p.ctx = {
 				meta: {
-					b: 5
-				}
+					b: 5,
+				},
 			};
 			return p;
 		});
@@ -612,10 +617,13 @@ describe("Test call with meta merge", () => {
 		let ctx = new Context(broker);
 		ctx.meta.a = "Hello";
 		ctx.meta.b = 1;
-		return ctx.call("posts.find", {}).catch(protectReject).then(() => {
-			expect(broker.call).toHaveBeenCalledTimes(1);
-			expect(ctx.meta).toEqual({ a: "Hello", b: 5 });
-		});
+		return ctx
+			.call("posts.find", {})
+			.catch(protectReject)
+			.then(() => {
+				expect(broker.call).toHaveBeenCalledTimes(1);
+				expect(ctx.meta).toEqual({ a: "Hello", b: 5 });
+			});
 	});
 
 	it("should merge meta from sub-context if rejected", () => {
@@ -623,11 +631,14 @@ describe("Test call with meta merge", () => {
 		let ctx = new Context(broker);
 		ctx.meta.a = "Hello";
 		ctx.meta.b = 1;
-		return ctx.call("posts.find", {}).then(protectReject).catch(e => {
-			expect(e).toBe(err);
-			expect(broker.call).toHaveBeenCalledTimes(1);
-			expect(ctx.meta).toEqual({ a: "Hello", b: 5 });
-		});
+		return ctx
+			.call("posts.find", {})
+			.then(protectReject)
+			.catch((e) => {
+				expect(e).toBe(err);
+				expect(broker.call).toHaveBeenCalledTimes(1);
+				expect(ctx.meta).toEqual({ a: "Hello", b: 5 });
+			});
 	});
 });
 
@@ -636,7 +647,7 @@ describe("Test mcall method", () => {
 	broker.mcall = jest.fn(() => broker.Promise.resolve());
 
 	let clock;
-	beforeAll(()=> clock = lolex.install());
+	beforeAll(() => (clock = lolex.install()));
 	afterAll(() => clock.uninstall());
 
 	it("should call broker.mcall method with itself", () => {
@@ -645,7 +656,7 @@ describe("Test mcall method", () => {
 		let p = { id: 5 };
 		let a = [
 			{ action: "posts.find", params: p },
-			{ action: "posts.list", params: p }
+			{ action: "posts.list", params: p },
 		];
 
 		ctx.mcall(a);
@@ -663,14 +674,17 @@ describe("Test mcall method", () => {
 		let p = { id: 5 };
 		let a = [
 			{ action: "posts.find", params: p },
-			{ action: "posts.list", params: p }
+			{ action: "posts.list", params: p },
 		];
 		let opts = { timeout: 2500 };
 
 		ctx.mcall(a, opts);
 
 		expect(broker.mcall).toHaveBeenCalledTimes(1);
-		expect(broker.mcall).toHaveBeenCalledWith(a, { parentCtx: ctx, timeout: 2500 });
+		expect(broker.mcall).toHaveBeenCalledWith(a, {
+			parentCtx: ctx,
+			timeout: 2500,
+		});
 		expect(broker.mcall.mock.calls[0][2]).not.toBe(opts);
 		expect(opts.parentCtx).toBeUndefined();
 	});
@@ -684,14 +698,17 @@ describe("Test mcall method", () => {
 		let p = { id: 5 };
 		let a = {
 			find: { action: "posts.find", params: p },
-			list: { action: "posts.list", params: p }
+			list: { action: "posts.list", params: p },
 		};
 		let opts = { timeout: 2500 };
 
 		ctx.mcall(a, opts);
 
 		expect(broker.mcall).toHaveBeenCalledTimes(1);
-		expect(broker.mcall).toHaveBeenCalledWith(a, { parentCtx: ctx, timeout: 2500 });
+		expect(broker.mcall).toHaveBeenCalledWith(a, {
+			parentCtx: ctx,
+			timeout: 2500,
+		});
 		expect(broker.mcall.mock.calls[0][2]).not.toBe(opts);
 		expect(opts.parentCtx).toBeUndefined();
 	});
@@ -707,7 +724,7 @@ describe("Test mcall method", () => {
 		let p = { id: 5 };
 		let a = [
 			{ action: "posts.find", params: p },
-			{ action: "posts.list", params: p }
+			{ action: "posts.list", params: p },
 		];
 		let opts = {};
 
@@ -729,15 +746,18 @@ describe("Test mcall method", () => {
 		let p = { id: 5 };
 		let a = [
 			{ action: "posts.find", params: p },
-			{ action: "posts.list", params: p }
+			{ action: "posts.list", params: p },
 		];
 		let opts = {};
 
-		return ctx.mcall(a, opts).then(protectReject).catch(err => {
-			expect(broker.mcall).toHaveBeenCalledTimes(0);
-			expect(err).toBeInstanceOf(RequestSkippedError);
-			expect(err.data.action).toBe("posts.find, posts.list");
-		});
+		return ctx
+			.mcall(a, opts)
+			.then(protectReject)
+			.catch((err) => {
+				expect(broker.mcall).toHaveBeenCalledTimes(0);
+				expect(err).toBeInstanceOf(RequestSkippedError);
+				expect(err.data.action).toBe("posts.find, posts.list");
+			});
 	});
 
 	it("should throw RequestSkippedError with object", () => {
@@ -751,15 +771,18 @@ describe("Test mcall method", () => {
 		let p = { id: 5 };
 		let a = {
 			find: { action: "posts.find", params: p },
-			list: { action: "posts.list", params: p }
+			list: { action: "posts.list", params: p },
 		};
 		let opts = {};
 
-		return ctx.mcall(a, opts).then(protectReject).catch(err => {
-			expect(broker.mcall).toHaveBeenCalledTimes(0);
-			expect(err).toBeInstanceOf(RequestSkippedError);
-			expect(err.data.action).toBe("posts.find, posts.list");
-		});
+		return ctx
+			.mcall(a, opts)
+			.then(protectReject)
+			.catch((err) => {
+				expect(broker.mcall).toHaveBeenCalledTimes(0);
+				expect(err).toBeInstanceOf(RequestSkippedError);
+				expect(err.data.action).toBe("posts.find, posts.list");
+			});
 	});
 
 	it("should throw Error if reached the 'maxCallLevel'", () => {
@@ -767,15 +790,18 @@ describe("Test mcall method", () => {
 
 		let ctx = new Context(broker);
 		ctx.level = 5;
-		return ctx.mcall([
-			{ action: "posts.find", params: {} },
-			{ action: "posts.list", params: {} }
-		]).then(protectReject).catch(err => {
-			expect(broker.mcall).toHaveBeenCalledTimes(0);
-			expect(err).toBeInstanceOf(MaxCallLevelError);
-			expect(err.code).toBe(500);
-			expect(err.data).toEqual({ nodeID: broker.nodeID, level: 5 });
-		});
+		return ctx
+			.mcall([
+				{ action: "posts.find", params: {} },
+				{ action: "posts.list", params: {} },
+			])
+			.then(protectReject)
+			.catch((err) => {
+				expect(broker.mcall).toHaveBeenCalledTimes(0);
+				expect(err).toBeInstanceOf(MaxCallLevelError);
+				expect(err.code).toBe(500);
+				expect(err.data).toEqual({ nodeID: broker.nodeID, level: 5 });
+			});
 	});
 });
 
@@ -783,21 +809,16 @@ describe("Test mcall with meta merge", () => {
 	let broker = new ServiceBroker({ logger: false, maxCallLevel: 5 });
 	let err = new Error("Subcall error");
 
-	broker.mcall = jest.fn()
+	broker.mcall = jest
+		.fn()
 		.mockImplementationOnce(() => {
 			const p = broker.Promise.resolve();
-			p.ctx = [
-				{ meta: { b: 5 } },
-				{ meta: { c: 3 } }
-			];
+			p.ctx = [{ meta: { b: 5 } }, { meta: { c: 3 } }];
 			return p;
 		})
 		.mockImplementationOnce(() => {
 			const p = broker.Promise.reject(err);
-			p.ctx = [
-				{ meta: { b: 5 } },
-				{ meta: { c: 3 } }
-			];
+			p.ctx = [{ meta: { b: 5 } }, { meta: { c: 3 } }];
 			return p;
 		});
 
@@ -805,13 +826,16 @@ describe("Test mcall with meta merge", () => {
 		let ctx = new Context(broker);
 		ctx.meta.a = "Hello";
 		ctx.meta.b = 1;
-		return ctx.mcall([
-			{ action: "posts.find", params: {} },
-			{ action: "posts.list", params: {} }
-		]).catch(protectReject).then(() => {
-			expect(broker.mcall).toHaveBeenCalledTimes(1);
-			expect(ctx.meta).toEqual({ a: "Hello", b: 5, c: 3 });
-		});
+		return ctx
+			.mcall([
+				{ action: "posts.find", params: {} },
+				{ action: "posts.list", params: {} },
+			])
+			.catch(protectReject)
+			.then(() => {
+				expect(broker.mcall).toHaveBeenCalledTimes(1);
+				expect(ctx.meta).toEqual({ a: "Hello", b: 5, c: 3 });
+			});
 	});
 
 	it("should merge meta from sub-context if rejected", () => {
@@ -819,14 +843,17 @@ describe("Test mcall with meta merge", () => {
 		let ctx = new Context(broker);
 		ctx.meta.a = "Hello";
 		ctx.meta.b = 1;
-		return ctx.mcall([
-			{ action: "posts.find", params: {} },
-			{ action: "posts.list", params: {} }
-		]).then(protectReject).catch(e => {
-			expect(e).toBe(err);
-			expect(broker.mcall).toHaveBeenCalledTimes(1);
-			expect(ctx.meta).toEqual({ a: "Hello", b: 5, c: 3 });
-		});
+		return ctx
+			.mcall([
+				{ action: "posts.find", params: {} },
+				{ action: "posts.list", params: {} },
+			])
+			.then(protectReject)
+			.catch((e) => {
+				expect(e).toBe(err);
+				expect(broker.mcall).toHaveBeenCalledTimes(1);
+				expect(ctx.meta).toEqual({ a: "Hello", b: 5, c: 3 });
+			});
 	});
 });
 
@@ -841,38 +868,54 @@ describe("Test emit method", () => {
 		ctx.emit("request.rest", data);
 
 		expect(broker.emit).toHaveBeenCalledTimes(1);
-		expect(broker.emit).toHaveBeenCalledWith("request.rest", data, { parentCtx: ctx, groups: undefined });
+		expect(broker.emit).toHaveBeenCalledWith("request.rest", data, {
+			parentCtx: ctx,
+			groups: undefined,
+		});
 	});
 
 	it("should call broker.emit method with string param", () => {
 		broker.emit.mockClear();
 		ctx.emit("request.rest", "string-data");
 		expect(broker.emit).toHaveBeenCalledTimes(1);
-		expect(broker.emit).toHaveBeenCalledWith("request.rest", "string-data", { parentCtx: ctx, groups: undefined });
+		expect(broker.emit).toHaveBeenCalledWith(
+			"request.rest",
+			"string-data",
+			{ parentCtx: ctx, groups: undefined }
+		);
 	});
 
 	it("should call broker.emit method without payload & group", () => {
 		broker.emit.mockClear();
 		ctx.emit("request.rest", null, "mail");
 		expect(broker.emit).toHaveBeenCalledTimes(1);
-		expect(broker.emit).toHaveBeenCalledWith("request.rest", null, { parentCtx: ctx, groups: ["mail"] });
+		expect(broker.emit).toHaveBeenCalledWith("request.rest", null, {
+			parentCtx: ctx,
+			groups: ["mail"],
+		});
 	});
 
 	it("should call broker.emit method without payload & groups", () => {
 		broker.emit.mockClear();
 		ctx.emit("request.rest", null, ["mail", "users"]);
 		expect(broker.emit).toHaveBeenCalledTimes(1);
-		expect(broker.emit).toHaveBeenCalledWith("request.rest", null, { parentCtx: ctx, groups: ["mail", "users"] });
+		expect(broker.emit).toHaveBeenCalledWith("request.rest", null, {
+			parentCtx: ctx,
+			groups: ["mail", "users"],
+		});
 	});
 
 	it("should call broker.emit method with opts", () => {
 		const data = { id: 5 };
 		broker.emit.mockClear();
 		ctx.emit("request.rest", data, {
-			groups: ["mail"]
+			groups: ["mail"],
 		});
 		expect(broker.emit).toHaveBeenCalledTimes(1);
-		expect(broker.emit).toHaveBeenCalledWith("request.rest", data, { parentCtx: ctx, groups: ["mail"] });
+		expect(broker.emit).toHaveBeenCalledWith("request.rest", data, {
+			parentCtx: ctx,
+			groups: ["mail"],
+		});
 	});
 });
 
@@ -887,46 +930,70 @@ describe("Test broadcast method", () => {
 		ctx.broadcast("request.rest", data);
 
 		expect(broker.broadcast).toHaveBeenCalledTimes(1);
-		expect(broker.broadcast).toHaveBeenCalledWith("request.rest", data, { parentCtx: ctx, groups: undefined });
+		expect(broker.broadcast).toHaveBeenCalledWith("request.rest", data, {
+			parentCtx: ctx,
+			groups: undefined,
+		});
 	});
 
 	it("should call broker.broadcast method with string param", () => {
 		broker.broadcast.mockClear();
 		ctx.broadcast("request.rest", "string-data");
 		expect(broker.broadcast).toHaveBeenCalledTimes(1);
-		expect(broker.broadcast).toHaveBeenCalledWith("request.rest", "string-data", { parentCtx: ctx, groups: undefined });
+		expect(broker.broadcast).toHaveBeenCalledWith(
+			"request.rest",
+			"string-data",
+			{ parentCtx: ctx, groups: undefined }
+		);
 	});
 
 	it("should call broker.broadcast method without payload & group", () => {
 		broker.broadcast.mockClear();
 		ctx.broadcast("request.rest", null, "users");
 		expect(broker.broadcast).toHaveBeenCalledTimes(1);
-		expect(broker.broadcast).toHaveBeenCalledWith("request.rest", null, { parentCtx: ctx, groups: ["users"] });
+		expect(broker.broadcast).toHaveBeenCalledWith("request.rest", null, {
+			parentCtx: ctx,
+			groups: ["users"],
+		});
 	});
 
 	it("should call broker.broadcast method without payload & groups", () => {
 		broker.broadcast.mockClear();
 		ctx.broadcast("request.rest", null, ["mail", "users"]);
 		expect(broker.broadcast).toHaveBeenCalledTimes(1);
-		expect(broker.broadcast).toHaveBeenCalledWith("request.rest", null, { parentCtx: ctx, groups: ["mail", "users"] });
+		expect(broker.broadcast).toHaveBeenCalledWith("request.rest", null, {
+			parentCtx: ctx,
+			groups: ["mail", "users"],
+		});
 	});
 
 	it("should call broker.broadcast method without payload & groups", () => {
 		const data = { id: 5 };
 		broker.broadcast.mockClear();
 		ctx.broadcast("request.rest", data, {
-			groups: ["mail"]
+			groups: ["mail"],
 		});
 		expect(broker.broadcast).toHaveBeenCalledTimes(1);
-		expect(broker.broadcast).toHaveBeenCalledWith("request.rest", data, { parentCtx: ctx, groups: ["mail"] });
+		expect(broker.broadcast).toHaveBeenCalledWith("request.rest", data, {
+			parentCtx: ctx,
+			groups: ["mail"],
+		});
 	});
-
 });
 
 describe("Test startSpan, finishSpan method", () => {
 	let broker = new ServiceBroker({ logger: false, tracing: true });
-	const fakeSpan2 = { id: 456, isActive: jest.fn(() => true), finish: jest.fn() };
-	const fakeSpan = { id: 123, isActive: jest.fn(() => false), startSpan: jest.fn(() => fakeSpan2), finish: jest.fn() };
+	const fakeSpan2 = {
+		id: 456,
+		isActive: jest.fn(() => true),
+		finish: jest.fn(),
+	};
+	const fakeSpan = {
+		id: 123,
+		isActive: jest.fn(() => false),
+		startSpan: jest.fn(() => fakeSpan2),
+		finish: jest.fn(),
+	};
 	broker.tracer.startSpan = jest.fn(() => fakeSpan);
 
 	let ctx = new Context(broker);
@@ -939,7 +1006,10 @@ describe("Test startSpan, finishSpan method", () => {
 		ctx.startSpan("custom span", opts);
 
 		expect(broker.tracer.startSpan).toHaveBeenCalledTimes(1);
-		expect(broker.tracer.startSpan).toHaveBeenCalledWith("custom span", Object.assign({ ctx }, opts));
+		expect(broker.tracer.startSpan).toHaveBeenCalledWith(
+			"custom span",
+			Object.assign({ ctx }, opts)
+		);
 		expect(ctx.span).toBe(fakeSpan);
 		expect(ctx._spanStack).toEqual([fakeSpan]);
 	});
@@ -952,7 +1022,10 @@ describe("Test startSpan, finishSpan method", () => {
 		ctx.startSpan("custom nested span", opts);
 
 		expect(fakeSpan.startSpan).toHaveBeenCalledTimes(1);
-		expect(fakeSpan.startSpan).toHaveBeenCalledWith("custom nested span", Object.assign({ ctx }, opts));
+		expect(fakeSpan.startSpan).toHaveBeenCalledWith(
+			"custom nested span",
+			Object.assign({ ctx }, opts)
+		);
 		expect(ctx.span).toBe(fakeSpan2);
 		expect(ctx._spanStack).toEqual([fakeSpan, fakeSpan2]);
 	});
@@ -970,7 +1043,6 @@ describe("Test startSpan, finishSpan method", () => {
 		expect(ctx.span).toBe(fakeSpan);
 		expect(ctx._spanStack).toEqual([fakeSpan]);
 	});
-
 
 	it("should not call finish of current spanif is not active", () => {
 		ctx.finishSpan(fakeSpan);
@@ -994,7 +1066,6 @@ describe("Test startSpan, finishSpan method", () => {
 		expect(ctx.span).toBeUndefined();
 		expect(ctx._spanStack).toEqual([]);
 	});
-
 });
 
 describe("Test toJSON method", () => {
@@ -1006,37 +1077,42 @@ describe("Test toJSON method", () => {
 			service: {
 				name: "posts",
 				version: 2,
-				fullName: "v2.posts"
-			}
+				fullName: "v2.posts",
+			},
 		},
-		id: "server-123"
+		id: "server-123",
 	};
 
-	const ctx = Context.create(broker, endpoint, { a: 5 }, {
-		timeout: 2500,
-		retries: 3,
-		fallbackResponse: "Hello",
-		meta: {
-			user: "John",
-			c: 200
-		},
-		locals: {
-			entity: "entity"
-		},
-		parentCtx: {
-			id: 100,
-			level: 5,
+	const ctx = Context.create(
+		broker,
+		endpoint,
+		{ a: 5 },
+		{
+			timeout: 2500,
+			retries: 3,
+			fallbackResponse: "Hello",
 			meta: {
-				token: "123456",
-				c: 100
+				user: "John",
+				c: 200,
 			},
-			requestID: "1234567890abcdef",
-			tracing: true,
-			service: {
-				fullName: "posts"
-			}
+			locals: {
+				entity: "entity",
+			},
+			parentCtx: {
+				id: 100,
+				level: 5,
+				meta: {
+					token: "123456",
+					c: 100,
+				},
+				requestID: "1234567890abcdef",
+				tracing: true,
+				service: {
+					fullName: "posts",
+				},
+			},
 		}
-	});
+	);
 	ctx.eventName = "post.created";
 	ctx.eventType = "emit";
 	ctx.eventGroups = ["users", "mail"];
@@ -1050,10 +1126,10 @@ describe("Test toJSON method", () => {
 			service: {
 				name: "posts",
 				version: 2,
-				fullName: "v2.posts"
+				fullName: "v2.posts",
 			},
 			action: {
-				name: "posts.find"
+				name: "posts.find",
 			},
 
 			caller: "posts",
@@ -1064,11 +1140,11 @@ describe("Test toJSON method", () => {
 			meta: {
 				token: "123456",
 				c: 200,
-				user: "John"
+				user: "John",
 			},
 			options: ctx.options,
 			params: {
-				a: 5
+				a: 5,
 			},
 			parentID: 100,
 			requestID: "1234567890abcdef",
@@ -1084,5 +1160,4 @@ describe("Test toJSON method", () => {
 		ctx.id = "123123123";
 		expect(ctx.toJSON().id).toBe("123123123");
 	});
-
 });
